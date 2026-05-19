@@ -2,12 +2,16 @@ const dns = require('node:dns')
 dns.setServers(['8.8.8.8', '8.8.4.4'])
 
 const express = require('express')
+const dotenv = require('dotenv')
+const cors = require('cors')
 const { MongoClient, ServerApiVersion } = require('mongodb');
+dotenv.config()
 const app = express()
+app.use(cors())
+app.use(express.json())
 
-const PORT = 5000
-
-const uri = "mongodb://DriveFleet:xSEUWrknHDyeXtuP@ac-m8tcky0-shard-00-00.6mg4csa.mongodb.net:27017,ac-m8tcky0-shard-00-01.6mg4csa.mongodb.net:27017,ac-m8tcky0-shard-00-02.6mg4csa.mongodb.net:27017/?ssl=true&replicaSet=atlas-q0lh1o-shard-0&authSource=admin&appName=Cluster0";
+const PORT = process.env.PORT
+const uri = process.env.MONGODB_URI
 
 // DriveFleet
 // xSEUWrknHDyeXtuP
@@ -24,11 +28,27 @@ async function run() {
   try {
     await client.connect()
 
+    const db = client.db('DriveFleet')
+    const carsCollection = db.collection('cars')
+
+    app.post('/cars', async(req, res)=> {
+        const car = req.body
+        console.log(car)
+        
+        const result = await carsCollection.insertOne(car)
+        res.json(result)
+
+
+    })
+
+
+
+
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
 
-    await client.close();
+    // await client.close();
   }
 }
 run().catch(console.dir);
