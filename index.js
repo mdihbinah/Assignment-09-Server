@@ -30,6 +30,7 @@ async function run() {
     const db = client.db('DriveFleet')
     const carsCollection = db.collection('cars')
     const bookingCollection = db.collection('bookings')
+    const myAddedCarsCollection = db.collection('my-added-cars')
 
     app.post('/cars', async(req, res)=> {
         const car = req.body
@@ -47,9 +48,25 @@ async function run() {
         res.json(result)
     })
 
+    app.post('/my-added-cars', async(req, res)=> {
+        const booking = req.body
+        console.log(booking)
+        const result = await myAddedCarsCollection.insertOne(booking)
+        res.json(result)
+    })
+
+
+
     app.get('/cars', async(req, res) => {
         // const id = req.params.id
         const result = await carsCollection.find().toArray()
+        res.json(result)
+    })
+
+    app.get(`/my-added-cars/:userId`, async(req, res) => {
+        const {userId} = req.params
+        
+        const result = await myAddedCarsCollection.find({userId}).toArray()
         res.json(result)
     })
 
