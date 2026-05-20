@@ -13,8 +13,7 @@ app.use(express.json())
 const PORT = process.env.PORT
 const uri = process.env.MONGODB_URI
 
-// DriveFleet
-// xSEUWrknHDyeXtuP
+
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -30,6 +29,7 @@ async function run() {
 
     const db = client.db('DriveFleet')
     const carsCollection = db.collection('cars')
+    const bookingCollection = db.collection('bookings')
 
     app.post('/cars', async(req, res)=> {
         const car = req.body
@@ -37,8 +37,31 @@ async function run() {
         
         const result = await carsCollection.insertOne(car)
         res.json(result)
+    })
 
+    app.post('/bookings', async(req, res)=> {
+        const booking = req.body
+        console.log(booking)
+        
+        const result = await bookingCollection.insertOne(booking)
+        res.json(result)
+    })
 
+    app.get('/cars', async(req, res) => {
+        // const id = req.params.id
+        const result = await carsCollection.find().toArray()
+        res.json(result)
+    })
+
+    app.get('/bookings', async(req, res) => {
+        const result = await bookingCollection.find().toArray()
+        res.json(result)
+    })
+
+    app.get('/bookings/:userId', async(req, res) => {
+      const {userId} = req.params
+        const result = await bookingCollection.find({userId}).toArray()
+        res.json(result)
     })
 
 
