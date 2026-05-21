@@ -4,7 +4,7 @@ dns.setServers(['8.8.8.8', '8.8.4.4'])
 const express = require('express')
 const dotenv = require('dotenv')
 const cors = require('cors')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 dotenv.config()
 const app = express()
 app.use(cors())
@@ -81,6 +81,22 @@ async function run() {
         res.json(result)
     })
 
+    app.patch(`/my-added-cars/:id`, async(req, res) => {
+      const {id} = req.params
+      const updateData = req.body
+
+      const result = myAddedCarsCollection.updateOne(
+        {_id: new ObjectId(id)},
+        {
+          $set: updateData
+        }
+      )
+
+      console.log(result)
+      
+      res.json(result)
+
+    })
 
 
 
