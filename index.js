@@ -58,8 +58,19 @@ async function run() {
 
 
     app.get('/cars', async(req, res) => {
-        // const id = req.params.id
         const result = await carsCollection.find().toArray()
+        res.json(result)
+    })
+    app.get('/car', async(req, res) => {
+      const search = req.query.search
+      // console.log(search)
+      
+        const result = await carsCollection.find({
+          carName: {
+            $regex: search,
+            $options: 'i'
+          }
+        }).toArray()
         res.json(result)
     })
 
