@@ -45,6 +45,11 @@ async function run() {
         console.log(booking)
         
         const result = await bookingCollection.insertOne(booking)
+        if(booking.carId){
+          const count = await carsCollection.updateOne({_id: new ObjectId(booking.carId)}, {$inc: {bookingCount: 1}})
+          console.log(count)
+          
+        }
         res.json(result)
     })
 
@@ -61,19 +66,59 @@ async function run() {
         const result = await carsCollection.find().toArray()
         res.json(result)
     })
-    app.get('/car', async(req, res) => {
-      const search = req.query.search
-      // console.log(search)
-      
-        const result = await carsCollection.find({
-          carName: {
-            $regex: search,
-            $options: 'i'
-          }
-        }).toArray()
-        res.json(result)
-    })
 
+    // app.get('/car', async(req, res) => {
+    //   const search = req.query.search
+    //   // console.log(search)
+    //     const result = await carsCollection.find({
+    //       carName: {
+    //         $regex: search,
+    //         $options: 'i'
+    //       }
+    //     }).toArray()
+    //     res.json(result)
+    // })
+
+    // app.get('/car', async(req, res) => {
+    //   const type = req.query.type
+    //   console.log(type)
+    //     const result = await carsCollection.find({
+    //       carType: {
+    //         $regex: type,
+    //         $options: 'i'
+    //       }
+    //     }).toArray()
+    //     res.json(result)
+    // })
+
+
+    app.get('/car', async(req, res) => {
+
+    const { search, type } = req.query;
+
+    let query = {};
+
+    // search by car name
+    if (search) {
+      query.carName = {
+        $regex: search,
+        $options: 'i'
+      };
+    }
+
+    // search by car type
+    if (type) {
+      query.carType = {
+        $regex: type,
+        $options: 'i'
+      };
+    }
+
+    const result = await carsCollection.find(query).toArray();
+
+    res.status(200).json(result);
+
+   });
     app.get(`/my-added-cars/:userId`, async(req, res) => {
         const {userId} = req.params
         
@@ -92,6 +137,8 @@ async function run() {
         res.json(result)
     })
 
+
+
     app.patch(`/my-added-cars/:id`, async(req, res) => {
       const {id} = req.params
       const updateData = req.body
@@ -101,9 +148,27 @@ async function run() {
           $set: updateData
         }
       )
+      // console.log(result)
+      res.json(result)
+    })
+
+
+    app.patch(`/cars/:id`, async(req, res) => {
+      const {id} = req.params
+      // const updateData = req.body
+      const result = myAddedCarsCollection.updateOne(
+        {_id: new ObjectId(id)},
+        {
+          $inc: {
+            bookingCount: +1
+          }
+        }
+      )
       console.log(result)
       res.json(result)
     })
+
+
 
     app.delete(`/my-added-cars/:id`, async(req, res) => {
       const {id} = req.params
